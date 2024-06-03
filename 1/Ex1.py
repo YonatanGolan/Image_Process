@@ -19,10 +19,11 @@ def interpulation(pic):  # 1.a
 
 
 def plot_hist(img, title='Image Histogram'):
-    hist, bins = np.histogram(img.flatten(), 256, [0, 256])  # allowed?
+    hist, bins = np.histogram(img.flatten(), 256, [0, 256])
     plt.plot(hist, color='gray')
     plt.xlim([0, 256])
     plt.title(title)
+    plt.savefig('./' + title + '.jpg')  # Save the histogram - optional
     plt.show()
 
 
@@ -40,6 +41,7 @@ def stretch_contrast(img, title='Stretched Image'):
     # Plot the new image and its histogram
     plt.imshow(new_img, cmap='gray')
     plt.title(title)
+    plt.savefig('./' + title + '.jpg')  # Save the image - optional (save with plt and not cv2 because of float values)
     plt.show()
     return new_img
 
@@ -60,39 +62,38 @@ def equalize_hist(img, title='Equalized Image'):
     # Plot the new image and its histogram
     plt.imshow(new_img, cmap='gray')
     plt.title(title)
+    cv2.imwrite('./' + title + '.jpg', new_img)  # Save the image - optional
     plt.show()
     return new_img
 
 
-if __name__ == '__main__':
-    # Part A
+if __name__ == '__main__':  # Part A
     # 1.Interpolation:
     # 1.b
     print('Loading peppers image')
-    peppers = cv2.imread('./hw12024_input_img/hw12024/peppers.jpg', 0)
+    peppers = cv2.imread('./peppers.jpg', 0)
     print('Interpolating peppers image by 2')
     peppers_interp_by_2 = interpulation(peppers)
     print('Saving interpolated peppers image (by 2)')
-    # cv2.imwrite('./output/peppers_interp_by_2.jpg', peppers_interp_by_2)
+    cv2.imwrite('./Peppers_interpolated_by_2.jpg', peppers_interp_by_2)
     # 1.c
     print('Interpolating peppers image by 8 - 3 times interpulation by 2')
     peppers_interp_by_8 = interpulation(interpulation(interpulation(peppers)))
     print('Saving interpolated peppers image (by 8)')
-    # cv2.imwrite('./output/peppers_interp_by_8.jpg', peppers_interp_by_8)
+    cv2.imwrite('./Peppers_interpolated_by_8.jpg', peppers_interp_by_8)
 
     # 2.Equal Histogram:
     print('Loading leaf image')
-    leaf = cv2.imread('./hw12024_input_img/hw12024/leafs.jpg', 0)
+    leaf = cv2.imread('./leafs.jpg', 0)
     # 2.a
     print('Calculating and plotting the histogram of the leaf image by the pixels values (0-255)')
-    plt.title('Leaf Image Histogram')
-    plot_hist(leaf, 'Leaf Image Histogram')
+    plot_hist(leaf, 'Leafs Histogram')
     # 2.b
     print('Stretching contrast of the leaf image')
-    strech_leaf = stretch_contrast(leaf, 'Stretched Leaf Image')
-    plot_hist(strech_leaf, 'Stretched Leaf Image Histogram')
+    strech_leaf = stretch_contrast(leaf, 'Stretched Leafs')
+    plot_hist(strech_leaf, 'Stretched Leafs Histogram')
     # 2.c
     print('Equalizing the histogram of the leaf image')
-    equalize_leaf = equalize_hist(leaf, 'Equalized Leaf Image')
-    plot_hist(equalize_leaf, 'Equalized Leaf Image Histogram')
+    equalize_leaf = equalize_hist(leaf, 'Equalized Leafs')
+    plot_hist(equalize_leaf, 'Equalized Leafs Histogram')
     print('Done')
