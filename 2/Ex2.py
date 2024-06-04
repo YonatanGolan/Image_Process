@@ -9,11 +9,13 @@ def conv2d(img, kernel):
                kernel - 2D numpy array of the kernel, size k*k
         output: 2D numpy array of the convolved image which in same
                 size as the original image using zero padding."""
-    # Zero padding
-    img = np.pad(img, 1)
+
     n, m = img.shape
     k = kernel.shape[0]
-    new_img = np.zeros((n - 2, m - 2))
+    padding_val = k // 2
+    # Zero padding
+    img = np.pad(img, padding_val)
+    new_img = np.zeros((n, m))
     for i in range(1, n - 1):
         for j in range(1, m - 1):
             new_img[i - 1, j - 1] = np.sum(img[i - 1:i + 2, j - 1:j + 2] * kernel)
@@ -21,6 +23,8 @@ def conv2d(img, kernel):
 
 def directive_filter(img):
     """ This function applies the directive filter on the image
+        instead of using the kernel 1*3 and write more code,
+         we will use the following kernel which is 3*3 and will give the same result:
         input: img - 2D numpy array of the original image
         output: 2D numpy array of the filtered image"""
     kernel = np.array([[0, 0, 0], [-1, 0, 1], [0, 0, 0]])
@@ -32,32 +36,53 @@ def gaussian_filter(img, sigma=1):
         output: 2D numpy array of the filtered image"""
     return ndimage.gaussian_filter(img, sigma)
 
-def sobel_filter(img):
+def sobel_filter(img, axis=-1):
     """ This function applies the sobel filter on the image
         input: img - 2D numpy array of the original image
         output: 2D numpy array of the filtered image"""
-    kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
-    return conv2d(img, kernel)
+    # Compute the Sobel gradients in the x and y direction
+    grad = ndimage.sobel(img)
+
+    # Normalize to 8-bit scale
+    grad = grad / grad.max() * 255
+
+    return grad.astype(np.uint8)
 
 def main():
-    # load image I.jpg
-    img = cv2.imread('./I.jpg', 0)
-    directive_img = directive_filter(img)
-    # Save the image
-    cv2.imwrite('./Directive_I.jpg', directive_img)
-    gaussian_img = gaussian_filter(img)
-    # Save the image
-    cv2.imwrite('./Gaussian_I.jpg', gaussian_img)
-    sobel_img = sobel_filter(img)
-    # Save the image
-    cv2.imwrite('./Sobel_I.jpg', sobel_img)
+    print("Loading image I.jpg")
+    img_I = cv2.imread('./I.jpg', 0)
 
-    # plt.figure()
-    # plt.subplot(221), plt.imshow(img, cmap='gray'), plt.title('Original Image')
-    # plt.subplot(222), plt.imshow(directive_img, cmap='gray'), plt.title('Directive Filter')
-    # plt.subplot(223), plt.imshow(gaussian_img, cmap='gray'), plt.title('Gaussian Filter')
-    # plt.subplot(224), plt.imshow(sobel_img, cmap='gray'), plt.title('Sobel Filter')
-    # plt.show()
+    print("Loading image I_n.jpg")
+    img_I_n = cv2.imread('./I_n.jpg', 0)
+
+    # Apply clipping filter on both images
+    directive_img_I = directive_filter(img_I)
+    directive_img_I_n = directive_filter(img_I_n)
+
+    # Display the images
+    cv2.imshow('Directive Filter on I.jpg', directive_img_I)
+    cv2.imshow('Directive Filter on I_n.jpg', directive_img_I_n)
+    cv2.imwrite('./directive_img_I.jpg', directive_img_I)
+    cv2.imwrite('./directive_img_I_n.jpg', directive_img_I_n)
+    cv2.waitKey(0)
+
+    # Apply Gaussian filter on I_n.jpg
+    gaussian_img = gaussian_filter(img_I_n, 1)
+    # Save the image
+    print ("Saving the gaussian image")
+    cv2.imwrite('./I_dn.jpg', gaussian_img)
+    # Display the image
+    cv2.imshow('Gaussian Filter on I_n.jpg', gaussian_img)
+    cv2.waitKey(0)
+
+    # Apply Sobel filter on I_n.jpg
+    sobel_img = sobel_filter(img_I_n)
+    # Save the image
+    print ("Saving the sobel image")
+    cv2.imwrite('./I_dn2.jpg', sobel_img)
+    # Display the image
+    cv2.imshow('Sobel Filter on I_n.jpg', sobel_img)
+    cv2.waitKey(0)
 
 if __name__ == '__main__':
     main()
