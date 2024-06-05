@@ -9,16 +9,18 @@ def conv2d(img, kernel):
                kernel - 2D numpy array of the kernel, size k*k
         output: 2D numpy array of the convolved image which in same
                 size as the original image using zero padding."""
-
     n, m = img.shape
     k = kernel.shape[0]
     padding_val = k // 2
     # Zero padding
-    img = np.pad(img, padding_val)
+    padded_img = np.zeros((n + 2 * padding_val, m + 2 * padding_val))
+    padded_img[padding_val:padding_val + n, padding_val:padding_val + m] = img
     new_img = np.zeros((n, m))
+    # Iterate over every pixel in the new image and apply the kernel
+    # on the surrounding pixels in the original image
     for i in range(1, n - 1):
         for j in range(1, m - 1):
-            new_img[i - 1, j - 1] = np.sum(img[i - 1:i + 2, j - 1:j + 2] * kernel)
+            new_img[i - 1, j - 1] = np.sum(padded_img[i - 1:i + 2, j - 1:j + 2] * kernel)
     return new_img
 
 def directive_filter(img):
@@ -37,20 +39,14 @@ def gaussian_filter(img, sigma=1):
     return ndimage.gaussian_filter(img, sigma)
 
 def sobel_filter(img):
-    """ This function applies the sobel filter on the image
+    """ This function applies the horizontal sobel filter on the image
+        as learned in the lecture
         input: img - 2D numpy array of the original image
         output: 2D numpy array of the filtered image"""
-    # Compute the Sobel gradients in the x direction (Leroy's told me to do so)
-    grad_x = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
 
-    # Compute the magnitude of the gradients
-    grad = np.abs(grad_x)
-
-    # Normalize to 8-bit scale
-    grad = grad / grad.max() * 255
-
-    return grad.astype(np.uint8)
-
+    kernel_x = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
+    grad_x = conv2d(img, kernel_x)
+    return grad_x
 def fft(img):
     """ This function applies the FFT on the image
         input: img - 2D numpy array of the original image
@@ -65,9 +61,9 @@ def display_mag_phase(fft_img, title = 'FFT'):
     """ This function displays the magnitude and the phase of the FFT
         input: fft_img - 2D numpy array of the FFT image"""
     plt.figure()
-    plt.subplot(121), plt.imshow(np.log(1 + np.abs(fft_img)), cmap='gray') # Log scaling for better visualization
+    plt.subplot(121), plt.imshow(np.log(1 + np.abs(fft_img)))# Log scaling for better visualization
     plt.title(f'Magnitude of {title}'), plt.xticks([]), plt.yticks([])
-    plt.subplot(122), plt.imshow(np.angle(fft_img), cmap='gray')
+    plt.subplot(122), plt.imshow(np.angle(fft_img))
     plt.title(f'Phase of {title}'), plt.xticks([]), plt.yticks([])
     plt.savefig(f'./fft_{title}.jpg')  # Save the image - optional
     plt.show()
@@ -75,14 +71,14 @@ def display_mag_phase(fft_img, title = 'FFT'):
 def display_mag(fft_img, title = 'FFT'):
     """ This function displays the magnitude of the FFT
         input: fft_img - 2D numpy array of the FFT image"""
-    plt.imshow(np.log(1 + np.abs(fft_img)), cmap='gray')
+    plt.imshow(np.log(1 + np.abs(fft_img)))
     plt.title(f'Magnitude of {title}')
     plt.savefig(f'./Magnitude_{title}.jpg')  # Save the image - optional
     plt.show()
 def display_phase(fft_img, title = 'FFT'):
     """ This function displays the phase of the FFT
         input: fft_img - 2D numpy array of the FFT image"""
-    plt.imshow(np.angle(fft_img), cmap='gray')
+    plt.imshow(np.angle(fft_img))
     plt.title(f'Phase of {title}')
     plt.savefig(f'./phase_{title}.jpg')  # Save the image - optional
     plt.show()
