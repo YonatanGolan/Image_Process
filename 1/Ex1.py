@@ -22,6 +22,8 @@ def plot_hist(img, title='Image Histogram'):
     hist, bins = np.histogram(img.flatten(), 256, [0, 256])
     plt.plot(hist, color='gray')
     plt.xlim([0, 256])
+    plt.xlabel('Intensity')
+    plt.ylabel('Number of pixels')
     plt.title(title)
     plt.savefig('./' + title + '.jpg')  # Save the histogram - optional
     plt.show()
@@ -36,12 +38,11 @@ def stretch_contrast(img, title='Stretched Image'):
     """
     min_value = np.min(img)
     max_value = np.max(img)
-    new_img = (img - min_value) * 255 / (max_value - min_value)
-
+    new_img = np.round(((img - min_value)/ (max_value - min_value)) * 255 ).astype(np.uint8)
     # Plot the new image and its histogram
     plt.imshow(new_img, cmap='gray')
     plt.title(title)
-    plt.savefig('./' + title + '.jpg')  # Save the image - optional (save with plt and not cv2 because of float values)
+    cv2.imwrite('./' + title + '.jpg', new_img)  # Save the image - optional
     plt.show()
     return new_img
 
