@@ -3,19 +3,19 @@ import cv2
 from matplotlib import pyplot as plt
 
 
-def interpulation(pic):  # 1.a
+def interpulation(img):  # 1.a
     """ This function does super resolution by bilinear interpulation
-        pic: 2D numpy array of the original image (n*m)
+        img: 2D numpy array of the original image (n*m)
         return: 2D numpy array of the new image (2n*2m)"""
-    n, m = pic.shape
-    new_pic = np.zeros((2 * n, 2 * m))
+    n, m = img.shape
+    new_img = np.zeros((2 * n, 2 * m))
     for i in range(n):
         for j in range(m):
-            new_pic[2 * i, 2 * j] = pic[i, j]
-            new_pic[2 * i + 1, 2 * j] = pic[i, j]
-            new_pic[2 * i, 2 * j + 1] = pic[i, j]
-            new_pic[2 * i + 1, 2 * j + 1] = pic[i, j]
-    return new_pic
+            new_img[2 * i, 2 * j] = img[i, j]
+            new_img[2 * i + 1, 2 * j] = img[i, j]
+            new_img[2 * i, 2 * j + 1] = img[i, j]
+            new_img[2 * i + 1, 2 * j + 1] = img[i, j]
+    return new_img
 
 
 def plot_hist(img, title='Image Histogram'):
