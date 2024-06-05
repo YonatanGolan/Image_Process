@@ -3,8 +3,8 @@ import cv2
 from matplotlib import pyplot as plt
 
 
-def interpulation(img):  # 1.a
-    """ This function does super resolution by bilinear interpulation
+def interpolation(img):  # 1.a
+    """ This function does super resolution by bilinear interpolation
         img: 2D numpy array of the original image (n*m)
         return: 2D numpy array of the new image (2n*2m)"""
     h, w = img.shape
@@ -48,38 +48,6 @@ def interpulation(img):  # 1.a
             top = top_left * dy1 + top_right * dy0  # interpolate in the y direction
             bottom = bottom_left * dy1 + bottom_right * dy0
             new_img[i, j] = top * dx1 + bottom * dx0  # interpolate in the x direction
-    return new_img
-
-
-def interpolate_by_2(img):
-    # interpolate by 2
-    h, w = img.shape
-    new_img = np.zeros((h * 2, w * 2))
-    h_new, w_new = new_img.shape
-    for i in range(h_new):
-        for j in range(w_new):
-            x = i / 2
-            y = j / 2
-            x_floor = int(np.floor(x))
-            y_floor = int(np.floor(y))
-            x_ceil = int(min(np.ceil(x), h - 1))
-            y_ceil = int(min(np.ceil(y), w - 1))
-
-            if x_floor == x_ceil and y_floor == y_ceil:
-                new_img[i, j] = img[x_floor, y_floor]  # no need to interpolate
-            elif x_floor == x_ceil:
-                # interpolate only in the y direction
-                new_img[i, j] = (y_ceil - y) * img[x_floor, y_floor] + (y - y_floor) * img[x_floor, y_ceil]
-                # it's in general writing, but in this case it is the same as:
-                # new_img[i, j] = 0.5 * img[x_floor, y_floor] + 0.5 * img[x_floor, y_ceil]
-            elif y_floor == y_ceil:
-                # interpolate only in the x direction
-                new_img[i, j] = (x_ceil - x) * img[x_floor, y_floor] + (x - x_floor) * img[x_ceil, y_floor]
-            else:
-                # interpolate in both directions
-                f1 = (x_ceil - x) * img[x_floor, y_floor] + (x - x_floor) * img[x_ceil, y_floor]
-                f2 = (x_ceil - x) * img[x_floor, y_ceil] + (x - x_floor) * img[x_ceil, y_ceil]
-                new_img[i, j] = (y_ceil - y) * f1 + (y - y_floor) * f2
     return new_img
 
 
@@ -141,12 +109,12 @@ if __name__ == '__main__':  # Part A
     print('Loading peppers image')
     peppers = cv2.imread('./peppers.jpg', 0)
     print('Interpolating peppers image by 2')
-    peppers_interp_by_2 = interpulation(peppers)
+    peppers_interp_by_2 = interpolation(peppers)
     print('Saving interpolated peppers image (by 2)')
     cv2.imwrite('./Peppers_interpolated_by_2.jpg', peppers_interp_by_2)
     # 1.c
     print('Interpolating peppers image by 8 ')  # 2 times interpolation by 2(to already interpolated by 2 image)
-    peppers_interp_by_8 = interpulation(interpulation(peppers_interp_by_2))
+    peppers_interp_by_8 = interpolation(interpolation(peppers_interp_by_2))
     print('Saving interpolated peppers image (by 8)')
     cv2.imwrite('./Peppers_interpolated_by_8.jpg', peppers_interp_by_8)
 
