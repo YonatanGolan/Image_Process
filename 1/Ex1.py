@@ -7,14 +7,79 @@ def interpulation(img):  # 1.a
     """ This function does super resolution by bilinear interpulation
         img: 2D numpy array of the original image (n*m)
         return: 2D numpy array of the new image (2n*2m)"""
-    n, m = img.shape
-    new_img = np.zeros((2 * n, 2 * m))
-    for i in range(n):
-        for j in range(m):
-            new_img[2 * i, 2 * j] = img[i, j]
-            new_img[2 * i + 1, 2 * j] = img[i, j]
-            new_img[2 * i, 2 * j + 1] = img[i, j]
-            new_img[2 * i + 1, 2 * j + 1] = img[i, j]
+    h, w = img.shape
+    new_h, new_w = h * 2, w * 2
+    new_img = np.zeros((new_h, new_w))
+
+    # Iterate over every pixel in the new image
+    for i in range(new_h):
+        for j in range(new_w):
+            # Find the coordinates in the original image
+            x = i / 2
+            y = j / 2
+
+            # Get the coordinates of the surrounding pixels
+            x0 = int(np.floor(x))
+            y0 = int(np.floor(y))
+            x1 = min(x0 + 1, h - 1)
+            y1 = min(y0 + 1, w - 1)
+
+            # Calculate the differences
+            dx0 = x - x0
+            dx1 = x1 - x
+            dy0 = y - y0
+            dy1 = y1 - y
+
+            # Get the pixel values
+            top_left = img[x0, y0]
+            top_right = img[x0, y1]
+            bottom_left = img[x1, y0]
+            bottom_right = img[x1, y1]
+
+            if x0 == x1 and y0 == y1:
+                new_img[i, j] = top_left  # no need to interpolate - take original pixel
+                continue
+            if x0 == x1:
+                new_img[i, j] = top_left * dy1 + top_right * dy0  # interpolate only in the y direction
+                continue
+            if y0 == y1:
+                new_img[i, j] = top_left * dx1 + bottom_left * dx0  # interpolate only in the x direction
+                continue
+            top = top_left * dy1 + top_right * dy0  # interpolate in the y direction
+            bottom = bottom_left * dy1 + bottom_right * dy0
+            new_img[i, j] = top * dx1 + bottom * dx0  # interpolate in the x direction
+    return new_img
+
+
+def interpolate_by_2(img):
+    # interpolate by 2
+    h, w = img.shape
+    new_img = np.zeros((h * 2, w * 2))
+    h_new, w_new = new_img.shape
+    for i in range(h_new):
+        for j in range(w_new):
+            x = i / 2
+            y = j / 2
+            x_floor = int(np.floor(x))
+            y_floor = int(np.floor(y))
+            x_ceil = int(min(np.ceil(x), h - 1))
+            y_ceil = int(min(np.ceil(y), w - 1))
+
+            if x_floor == x_ceil and y_floor == y_ceil:
+                new_img[i, j] = img[x_floor, y_floor]  # no need to interpolate
+            elif x_floor == x_ceil:
+                # interpolate only in the y direction
+                new_img[i, j] = (y_ceil - y) * img[x_floor, y_floor] + (y - y_floor) * img[x_floor, y_ceil]
+                # it's in general writing, but in this case it is the same as:
+                # new_img[i, j] = 0.5 * img[x_floor, y_floor] + 0.5 * img[x_floor, y_ceil]
+            elif y_floor == y_ceil:
+                # interpolate only in the x direction
+                new_img[i, j] = (x_ceil - x) * img[x_floor, y_floor] + (x - x_floor) * img[x_ceil, y_floor]
+            else:
+                # interpolate in both directions
+                f1 = (x_ceil - x) * img[x_floor, y_floor] + (x - x_floor) * img[x_ceil, y_floor]
+                f2 = (x_ceil - x) * img[x_floor, y_ceil] + (x - x_floor) * img[x_ceil, y_ceil]
+                new_img[i, j] = (y_ceil - y) * f1 + (y - y_floor) * f2
     return new_img
 
 
@@ -80,8 +145,8 @@ if __name__ == '__main__':  # Part A
     print('Saving interpolated peppers image (by 2)')
     cv2.imwrite('./Peppers_interpolated_by_2.jpg', peppers_interp_by_2)
     # 1.c
-    print('Interpolating peppers image by 8 - 3 times interpulation by 2')
-    peppers_interp_by_8 = interpulation(interpulation(interpulation(peppers)))
+    print('Interpolating peppers image by 8 ')  # 2 times interpolation by 2(to already interpolated by 2 image)
+    peppers_interp_by_8 = interpulation(interpulation(peppers_interp_by_2))
     print('Saving interpolated peppers image (by 8)')
     cv2.imwrite('./Peppers_interpolated_by_8.jpg', peppers_interp_by_8)
 
