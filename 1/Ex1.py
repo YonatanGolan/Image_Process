@@ -34,11 +34,12 @@ def stretch_contrast(img, title='Stretched Image'):
     This function stretches the contrast of the image - for each pixel value, the new value is calculated by:
     new_value = (value - min_value) * 255 / (max_value - min_value)
     :param img: 2D numpy array of the original image
+    :param title: title of the plot
     :return: stretched image
     """
     min_value = np.min(img)
     max_value = np.max(img)
-    new_img = np.round(((img - min_value)/ (max_value - min_value)) * 255 ).astype(np.uint8)
+    new_img = np.round(((img - min_value) / (max_value - min_value)) * 255).astype(np.uint8)
     # Plot the new image and its histogram
     plt.imshow(new_img, cmap='gray')
     plt.title(title)
@@ -51,6 +52,7 @@ def equalize_hist(img, title='Equalized Image'):
     """
     This function equalizes the histogram of the image
     :param img: 2D numpy array of the original image
+    :param title: title of the plot
     :return: equalized image
     """
     hist, bins = np.histogram(img.flatten(), 256, [0, 256])
