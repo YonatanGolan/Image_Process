@@ -18,9 +18,9 @@ def conv2d(img, kernel):
     new_img = np.zeros((n, m))
     # Iterate over every pixel in the new image and apply the kernel
     # on the surrounding pixels in the original image
-    for i in range(1, n - 1):
-        for j in range(1, m - 1):
-            new_img[i - 1, j - 1] = np.sum(padded_img[i - 1:i + 2, j - 1:j + 2] * kernel)
+    for i in range(n):
+        for j in range(m):
+            new_img[i, j] = np.sum(padded_img[i:i + k, j:j + k] * kernel)
     return new_img
 
 def directive_filter(img):
@@ -61,7 +61,7 @@ def display_mag_phase(fft_img, title = 'FFT'):
     """ This function displays the magnitude and the phase of the FFT
         input: fft_img - 2D numpy array of the FFT image"""
     plt.figure()
-    plt.subplot(121), plt.imshow(np.log(1 + np.abs(fft_img)))# Log scaling for better visualization
+    plt.subplot(121), plt.imshow(np.log(1 + np.abs(fft_img))) # Log scaling for better visualization
     plt.title(f'Magnitude of {title}'), plt.xticks([]), plt.yticks([])
     plt.subplot(122), plt.imshow(np.angle(fft_img))
     plt.title(f'Phase of {title}'), plt.xticks([]), plt.yticks([])
@@ -95,14 +95,14 @@ def main():
     directive_img_I_n = directive_filter(img_I_n)
 
     # Display the images
-    cv2.imshow('Directive Filter on I.jpg', directive_img_I)
+    # cv2.imshow('Directive Filter on I.jpg', directive_img_I)
     # plt.imshow(directive_img_I, cmap='gray')
     # plt.title('Directive Filter on I.jpg')
     # plt.show()
-    cv2.imshow('Directive Filter on I_n.jpg', directive_img_I_n)
+    # cv2.imshow('Directive Filter on I_n.jpg', directive_img_I_n)
     cv2.imwrite('./directive_img_I.jpg', directive_img_I)
     cv2.imwrite('./directive_img_I_n.jpg', directive_img_I_n)
-    cv2.waitKey(0)
+    # cv2.waitKey(0)
 
     # Apply Gaussian filter on I_n.jpg
     gaussian_img = gaussian_filter(img_I_n, 2)
@@ -156,7 +156,7 @@ def main():
     plt.title('Mixed Image')
     plt.show()
     cv2.imwrite('./mixed_img.jpg', mixed_img)
-
+    print("Done")
 
 if __name__ == '__main__':
     main()
