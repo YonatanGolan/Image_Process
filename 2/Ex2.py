@@ -44,7 +44,7 @@ def sobel_filter(img):
         input: img - 2D numpy array of the original image
         output: 2D numpy array of the filtered image"""
 
-    kernel_x = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]]) * 1/8
+    kernel_x = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
     grad_x = conv2d(img, kernel_x)
     return grad_x
 def fft(img):
