@@ -1,14 +1,16 @@
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
-from scipy import ndimage,fftpack
+from scipy import ndimage, fftpack
+
 
 def conv2d(img, kernel):
-    """ This function performs 2D convolution between an image and a kernel
-        input: img - 2D numpy array of the original image,
-               kernel - 2D numpy array of the kernel, size k*k
-        output: 2D numpy array of the convolved image which in same
-                size as the original image using zero padding."""
+    """
+    This function performs 2D convolution between an image and a kernel
+    :param: img: 2D numpy array of the original image.
+    :param: kernel: 2D numpy array of the kernel, size k*k
+    :return: 2D numpy array of the convolved image which in same size as the original image using zero padding.
+    """
     n, m = img.shape
     k = kernel.shape[0]
     padding_val = k // 2
@@ -23,65 +25,94 @@ def conv2d(img, kernel):
             new_img[i, j] = np.sum(padded_img[i:i + k, j:j + k] * kernel)
     return new_img
 
+
 def directive_filter(img):
-    """ This function applies the directive filter on the image
-        instead of using the kernel 1*3 and write more code,
-         we will use the following kernel which is 3*3 and will give the same result:
-        input: img - 2D numpy array of the original image
-        output: 2D numpy array of the filtered image"""
+    """
+    This function applies the directive filter on the image instead of using the kernel 1*3 and write more code,
+    we will use the following kernel which is 3*3 and will give the same result.
+    :param: img: 2D numpy array of the original image
+    :return: 2D numpy array of the filtered image
+    """
     kernel = np.array([[0, 0, 0], [-1, 0, 1], [0, 0, 0]])
     return conv2d(img, kernel)
 
+
 def gaussian_filter(img, sigma=1):
-    """ This function applies the gaussian filter on the image
-        input: img - 2D numpy array of the original image
-        output: 2D numpy array of the filtered image"""
+    """
+    This function applies the gaussian filter on the image
+    :param: img: 2D numpy array of the original image
+    :return: 2D numpy array of the filtered image
+    """
     return ndimage.gaussian_filter(img, sigma)
 
-def sobel_filter(img):
-    """ This function applies the horizontal sobel filter on the image
-        as learned in the lecture
-        input: img - 2D numpy array of the original image
-        output: 2D numpy array of the filtered image"""
 
+def sobel_filter(img):
+    """
+    This function applies the horizontal sobel filter on the image as learned in the lecture
+    :param: img: 2D numpy array of the original image
+    :return: 2D numpy array of the filtered image
+    """
     kernel_x = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
     grad_x = conv2d(img, kernel_x)
     return grad_x
+
+
 def fft(img):
-    """ This function applies the FFT on the image
-        input: img - 2D numpy array of the original image
-        output: 2D numpy array of the filtered image"""
+    """
+    This function applies the FFT on the image
+    :param: img: 2D numpy array of the original image
+    :return: 2D numpy array of the filtered image
+    """
     return fftpack.fftshift(fftpack.fft2(img))
+
+
 def ifft(fft_img):
-    """ This function applies the inverse FFT on the image
-        input: fft_img - 2D numpy array of the FFT image
-        output: 2D numpy array of the filtered image"""
+    """
+    This function applies the inverse FFT on the image
+    :param: fft_img: 2D numpy array of the FFT image
+    :return: 2D numpy array of the filtered image
+    """
     return fftpack.ifft2(fftpack.ifftshift(fft_img)).real
-def display_mag_phase(fft_img, title = 'FFT'):
-    """ This function displays the magnitude and the phase of the FFT
-        input: fft_img - 2D numpy array of the FFT image"""
+
+
+def display_mag_phase(fft_img, title='FFT'):
+    """
+    This function displays the magnitude and the phase of the FFT
+    :param: fft_img: 2D numpy array of the FFT image
+    :param: title: string of the title of the image
+    """
     plt.figure()
-    plt.subplot(121), plt.imshow(np.log(1 + np.abs(fft_img))) # Log scaling for better visualization
+    plt.subplot(121), plt.imshow(np.log(1 + np.abs(fft_img)))  # Log scaling for better visualization
     plt.title(f'Magnitude of {title}'), plt.xticks([]), plt.yticks([])
     plt.subplot(122), plt.imshow(np.angle(fft_img))
     plt.title(f'Phase of {title}'), plt.xticks([]), plt.yticks([])
     plt.savefig(f'./fft_{title}.jpg')  # Save the image - optional
     plt.show()
 
-def display_mag(fft_img, title = 'FFT'):
-    """ This function displays the magnitude of the FFT
-        input: fft_img - 2D numpy array of the FFT image"""
+
+def display_mag(fft_img, title='FFT'):
+    """
+    This function displays the magnitude of the FFT
+    :param: fft_img: 2D numpy array of the FFT image
+    :param: title: string of the title of the image
+    """
     plt.imshow(np.log(1 + np.abs(fft_img)))
     plt.title(f'Magnitude of {title}')
     plt.savefig(f'./Magnitude_{title}.jpg')  # Save the image - optional
     plt.show()
-def display_phase(fft_img, title = 'FFT'):
-    """ This function displays the phase of the FFT
-        input: fft_img - 2D numpy array of the FFT image"""
+
+
+def display_phase(fft_img, title='FFT'):
+    """
+    This function displays the phase of the FFT
+    :param: fft_img: 2D numpy array of the FFT image
+    :param: title: string of the title of the image
+    """
     plt.imshow(np.angle(fft_img))
     plt.title(f'Phase of {title}')
     plt.savefig(f'./phase_{title}.jpg')  # Save the image - optional
     plt.show()
+
 
 def main():
     print("Loading image I.jpg")
@@ -102,7 +133,6 @@ def main():
     cv2.imwrite('./directive_img_I.jpg', directive_img_I)
     cv2.imwrite('./directive_img_I_n.jpg', directive_img_I_n)
 
-
     # Apply Gaussian filter on I_n.jpg
     gaussian_img = gaussian_filter(img_I_n, 2)
     # Save the image
@@ -121,7 +151,7 @@ def main():
     cv2.imshow('Sobel Filter on I_n.jpg', sobel_img)
     cv2.waitKey(0)
 
-    #3a calculate the FFT of I.jpg and I_n.jpg and display the magnitude and the phase
+    # 3a calculate the FFT of I.jpg and I_n.jpg and display the magnitude and the phase
     fft_img_I = fft(img_I)
     fft_img_I_n = fft(img_I_n)
     # Display the magnitude and the phase of the FFT
@@ -135,7 +165,7 @@ def main():
     fft_img_diff = np.abs(np.abs(fft_img_I) - np.abs(fft_img_I_n))
     display_mag(fft_img_diff, 'I-I_n')
 
-    #3c magnitude of chita.jpg and phase of zebra.jpg
+    # 3c magnitude of chita.jpg and phase of zebra.jpg
     img_chita = cv2.imread('./chita.jpeg', 0)
     img_zebra = cv2.imread('./zebra.jpeg', 0)
     print("Displaying the magnitude of chita.jpeg and the phase of zebra.jpeg")
@@ -144,7 +174,7 @@ def main():
     display_mag(fft_img_chita, 'chita.jpeg')
     display_phase(fft_img_zebra, 'zebra.jpeg')
 
-    #3d calculate the inverse FFT of magnitude of chita.jpg and phase of zebra.jpg
+    # 3d calculate the inverse FFT of magnitude of chita.jpg and phase of zebra.jpg
     # and display the result
     # Resize the images to have the same dimensions
     img_chita = cv2.resize(img_chita, (img_zebra.shape[1], img_zebra.shape[0]))
@@ -157,6 +187,7 @@ def main():
     plt.show()
     cv2.imwrite('./mixed_img.jpg', mixed_img)
     print("Done")
+
 
 if __name__ == '__main__':
     main()
