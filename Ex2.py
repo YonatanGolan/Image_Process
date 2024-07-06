@@ -44,74 +44,67 @@ def dlt(matrix1, matrix2):
     This function implements direct linear transform, using SVD to compute the homography between the matrices
     :param matrix1: first set of 4 (x,y) coordinates from matches between images
     :param matrix2: second set of 4 (x,y) coordinates from matches between images
-    :return: Homography 3x3 matrix by using Singular Value Decomposition (SVD)
+    :return: Homography 3x3 matrix using SVD
     """
-    assert len(matrix1) == len(matrix2) == 4, "Both coordinate sets must have 4 sub-coordinates"
+    assert len(matrix1) == len(matrix2) == 4, "wrong number of coordinates in the matrices"
 
-    # Create the matrix A as learned in class
-    A = []
+    # Creating A matrix
+    A_matrix = []
     for i in range(len(matrix1)):
         xi, yi = matrix1[i]
         xi_tag, yi_tag = matrix2[i]
 
-        A.append([-xi, -yi, -1, 0, 0, 0, xi_tag * xi, xi_tag * yi, xi_tag])
-        A.append([0, 0, 0, -xi, -yi, -1, yi_tag * xi, yi_tag * yi, yi_tag])
+        A_matrix.append([-xi, -yi, -1, 0, 0, 0, xi_tag * xi, xi_tag * yi, xi_tag])
+        A_matrix.append([0, 0, 0, -xi, -yi, -1, yi_tag * xi, yi_tag * yi, yi_tag])
 
-    # Convert from list to np.array
-    A = np.array(A)
-
-    # Get Vh which is a Hermitian (conjugate transpose) matrix representing the right singular vectors of A.
-    U, s, Vh = linalg.svd(A)
-
-    # Reshape the last row of Vh into 3x3 matrix
-    H = Vh[-1, :].reshape((3, 3))
+    A_matrix = np.array(A_matrix)
+    # Perform Singular Value Decomposition (SVD) on A.
+    _, _, V_h = linalg.svd(A_matrix)
+    # make last row of Vh 3x3 matrix
+    H = V_h[-1, :].reshape((3, 3))
     return H
 
 
 def RANSAC(coordinates1, coordinates2, threshold, max_iterations=1000):
     """"
     This function find the best homography
-    :param coordinates1: A set of coordinates from the first image
-    :param coordinates2: A set of coordinates from the second image
+    :param coordinates1: set of coordinates from the first image
+    :param coordinates2: set of coordinates from the second image
     :param threshold: Threshold value
     :param max_iterations: Maximum iterations to perform homography
-    :return: The best homography matrix 3X3 (which gives the maximum inliers) and the number of inliers
+    :return: Best homography matrix 3X3 (which gives the maximum inliers) and the number of inliers
     """
-    best_homography = None
-    best_inliers = 0
+    ret_homography = None
+    ret_inliers = 0
 
     # iterations will be done max_iteration times until the "best homography" will be found
     # best homography - the one that gives maximal count of inliners
     for _ in tqdm(range(max_iterations)):
 
-        # Randomly pick 4 points from coordinates1 and coordinates2
+        # pick 4 points from coordinates1 and coordinates2
         random_indices = random.sample(range(len(coordinates1)), 4)
         matrix1 = [coordinates1[i] for i in random_indices]
         matrix2 = [coordinates2[i] for i in random_indices]
 
         # Compute homography
-        homography = dlt(matrix1, matrix2)
+        curr_homography = dlt(matrix1, matrix2)
 
-        # Count inliers
+        # Counting the inliers
         inliers = 0
         for i in range(len(coordinates1)):
             # To make sure the shape is correct: (1,1,2)
             point1 = np.array([[[coordinates1[i][0], coordinates1[i][1]]]], dtype=np.float32)
-
-            # Transform point1 using the homography
-            transformed_point = cv2.perspectiveTransform(point1, homography)
-
-            # Calculate the distance between the transformed point and a point from coordinates2
-            distance = np.linalg.norm(coordinates2[i] - transformed_point[0][0])
-            if distance < threshold:
+            trans_point = cv2.perspectiveTransform(point1, curr_homography) # Transform point1
+            # distance between the transformed point and the original point
+            dist = np.linalg.norm(coordinates2[i] - trans_point[0][0])
+            if dist < threshold:
                 inliers += 1
+        # Updating best homography and inliers by checking the current number of inliers
+        if inliers > ret_inliers:
+            ret_inliers = inliers
+            ret_homography = curr_homography
 
-        # Update best homography and inliers if current iteration has more inliers
-        if inliers > best_inliers:
-            best_inliers = inliers
-            best_homography = homography
-
-    return best_homography, best_inliers
+    return ret_homography, ret_inliers
 
 
 def stitch_images(image1, image2, homography):
