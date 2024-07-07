@@ -94,7 +94,7 @@ def RANSAC(coordinates1, coordinates2, threshold, max_iterations=1000):
         for i in range(len(coordinates1)):
             # To make sure the shape is correct: (1,1,2)
             point1 = np.array([[[coordinates1[i][0], coordinates1[i][1]]]], dtype=np.float32)
-            trans_point = cv2.perspectiveTransform(point1, curr_homography) # Transform point1
+            trans_point = cv2.perspectiveTransform(point1, curr_homography)  # Transform point1
             # distance between the transformed point and the original point
             dist = np.linalg.norm(coordinates2[i] - trans_point[0][0])
             if dist < threshold:
