@@ -62,6 +62,8 @@ def dlt(matrix1, matrix2):
     _, _, V_h = linalg.svd(A_matrix)
     # make last row of Vh 3x3 matrix
     H = V_h[-1, :].reshape((3, 3))
+    # Normalize to make H[2,2] = 1
+    # H /= H[2, 2]
     return H
 
 
@@ -76,7 +78,7 @@ def RANSAC(coordinates1, coordinates2, threshold, max_iterations=1000):
     """
     ret_homography = None
     ret_inliers = 0
-
+    random.seed(43)
     # iterations will be done max_iteration times until the "best homography" will be found
     # best homography - the one that gives maximal count of inliners
     for _ in tqdm(range(max_iterations)):
