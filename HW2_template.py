@@ -91,7 +91,7 @@ def stitch_images(image1, image2, homography):
 
     plt.figure()
     plt.imshow(blended, cmap='gray')
-    cv2.imwrite('panoramic_image.jpg', blended)
+    cv2.imwrite('panoramic_image_threshold=1.jpg', blended)
 
 # Main
 
